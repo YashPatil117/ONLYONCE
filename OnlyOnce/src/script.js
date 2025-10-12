@@ -15,14 +15,41 @@ const charCount = document.querySelector('.char-count');
 const params = new URLSearchParams(window.location.search);
 const messageId = params.get("id");
 
+// Test Firestore connection
+async function testFirestore() {
+  try {
+    console.log("🧪 Testing Firestore connection...");
+    const testId = 'test-' + Math.random().toString(36).substring(2, 5);
+    await firebase.firestore().collection("messages").doc(testId).set({
+      text: "Test message",
+      isPublic: true,
+      createdAt: new Date().toISOString()
+    });
+    console.log("✅ Firestore write successful");
+    
+    const snap = await firebase.firestore().collection("messages").doc(testId).get();
+    if (snap.exists) {
+      console.log("✅ Firestore read successful");
+      await firebase.firestore().collection("messages").doc(testId).delete();
+      console.log("✅ Firestore delete successful");
+    }
+  } catch (error) {
+    console.error("❌ Firestore error:", error);
+  }
+}
+
 // Character count for textarea
 msgText.addEventListener('input', () => {
   charCount.textContent = `${msgText.value.length}/500`;
 });
 
+// Initialize app
 if (messageId) {
+  console.log("📨 Message ID found in URL:", messageId);
   showMessage(messageId);
 } else {
+  console.log("🏠 Loading main page...");
+  testFirestore();
   loadPublicMessages();
   loadPrivateMessages();
 }
@@ -34,6 +61,8 @@ createBtn.addEventListener("click", async () => {
   const visibility = document.querySelector('input[name="visibility"]:checked').value;
   const id = Math.random().toString(36).substring(2, 10);
 
+  console.log("🔄 Creating message:", { text: text?.substring(0, 50), hasFile: !!file, visibility, id });
+
   if (!text && !file) {
     alert("Please add a message or image!");
     return;
@@ -42,17 +71,20 @@ createBtn.addEventListener("click", async () => {
   let fileURL = null;
   if (file) {
     try {
+      console.log("📤 Uploading file...");
       const storageRef = firebase.storage().ref(`files/${id}-${file.name}`);
       await storageRef.put(file);
       fileURL = await storageRef.getDownloadURL();
+      console.log("✅ File uploaded:", fileURL);
     } catch (error) {
-      console.error("File upload failed:", error);
+      console.error("❌ File upload failed:", error);
       alert("Failed to upload image. Please try again.");
       return;
     }
   }
 
   try {
+    console.log("💾 Saving to Firestore...");
     await firebase.firestore().collection("messages").doc(id).set({
       text,
       fileURL,
@@ -60,6 +92,7 @@ createBtn.addEventListener("click", async () => {
       createdAt: new Date().toISOString(),
       creator: localStorage.getItem('userId') || generateUserId()
     });
+    console.log("✅ Message saved to Firestore");
 
     if (visibility === "private") {
       const messageUrl = `${window.location.origin}${window.location.pathname}?id=${id}`;
@@ -71,20 +104,18 @@ createBtn.addEventListener("click", async () => {
       `;
       linkOutput.style.display = 'block';
       
-      // Add to private messages list
       addPrivateMessageToList(id, text, fileURL);
     } else {
       alert("Your public message is now visible!");
       loadPublicMessages();
     }
 
-    // Reset form
     msgText.value = "";
     msgFile.value = "";
     charCount.textContent = "0/500";
     
   } catch (error) {
-    console.error("Error creating message:", error);
+    console.error("❌ Error creating message:", error);
     alert("Failed to create message. Please try again.");
   }
 });
@@ -92,9 +123,13 @@ createBtn.addEventListener("click", async () => {
 // Load public messages
 async function loadPublicMessages() {
   try {
+    console.log("📥 Loading public messages...");
     const snapshot = await firebase.firestore().collection("messages").get();
     const all = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    console.log("📦 All messages from Firestore:", all);
+    
     const publicMsgs = all.filter(m => m.isPublic);
+    console.log("👥 Public messages:", publicMsgs);
     
     messageWall.innerHTML = "";
     
@@ -108,20 +143,23 @@ async function loadPublicMessages() {
       messageWall.appendChild(messageCard);
     });
   } catch (error) {
-    console.error("Error loading public messages:", error);
+    console.error("❌ Error loading public messages:", error);
     messageWall.innerHTML = '<div class="error">Failed to load messages</div>';
   }
 }
 
-// Load private messages (created by current user)
+// Load private messages
 async function loadPrivateMessages() {
   const userId = localStorage.getItem('userId') || generateUserId();
   localStorage.setItem('userId', userId);
+  console.log("👤 User ID:", userId);
   
   try {
     const snapshot = await firebase.firestore().collection("messages").get();
     const all = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
     const privateMsgs = all.filter(m => !m.isPublic && m.creator === userId);
+    
+    console.log("🔒 Private messages for user:", privateMsgs);
     
     privateMessagesList.innerHTML = "";
     
@@ -134,7 +172,7 @@ async function loadPrivateMessages() {
       addPrivateMessageToList(msg.id, msg.text, msg.fileURL);
     });
   } catch (error) {
-    console.error("Error loading private messages:", error);
+    console.error("❌ Error loading private messages:", error);
   }
 }
 
@@ -175,6 +213,7 @@ function createMessageCard(msg, isPrivate = false) {
   `;
   
   messageCard.onclick = () => {
+    console.log("🖱️ Clicked message:", msg.id);
     if (isPrivate) {
       previewPrivateMessage(msg.id);
     } else {
@@ -187,42 +226,57 @@ function createMessageCard(msg, isPrivate = false) {
 
 // Show message (when URL has ID)
 async function showMessage(id) {
+  console.log("🔄 Loading message with ID:", id);
+  
   document.querySelector(".main-layout").classList.add("hidden");
   messageView.classList.remove("hidden");
 
   try {
     const docRef = firebase.firestore().collection("messages").doc(id);
-    const snap = await docRef.get();
+    console.log("📡 Fetching from Firestore...");
     
-    if (snap.exists()) {
+    const snap = await docRef.get();
+    console.log("📄 Firestore response:", snap.exists ? "EXISTS" : "NOT FOUND");
+    
+    if (snap.exists) {
       const data = snap.data();
-      messageText.textContent = data.text || "";
+      console.log("📦 Message data:", data);
+      
+      messageText.textContent = data.text || "No text content";
       
       if (data.fileURL) {
+        console.log("🖼️ Loading image:", data.fileURL);
         messageImage.src = data.fileURL;
         messageImage.style.display = "block";
+      } else {
+        messageImage.style.display = "none";
       }
       
       status.textContent = "⚠️ This message has now been deleted forever.";
+      
+      console.log("🗑️ Deleting message...");
       await docRef.delete();
+      console.log("✅ Message deleted successfully");
     } else {
+      console.log("❌ Message not found in Firestore");
       messageText.textContent = "This message was already opened or deleted.";
       status.textContent = "";
     }
   } catch (error) {
-    console.error("Error showing message:", error);
-    messageText.textContent = "Failed to load message.";
+    console.error("💥 Error showing message:", error);
+    messageText.textContent = "Failed to load message. Check console for errors.";
     status.textContent = "";
   }
 }
 
-// Preview private message (without deleting it)
+// Preview private message
 async function previewPrivateMessage(id) {
   try {
+    console.log("👀 Previewing private message:", id);
     const docRef = firebase.firestore().collection("messages").doc(id);
     const snap = await docRef.get();
     
-    if (snap.exists()) {
+    if (snap.exists) {
       const data = snap.data();
       
       document.querySelector(".main-layout").classList.add("hidden");
@@ -249,8 +303,8 @@ async function previewPrivateMessage(id) {
 // Forward message URL
 function forwardMessage(id) {
   const messageUrl = `${window.location.origin}${window.location.pathname}?id=${id}`;
+  console.log("📤 Forwarding message URL:", messageUrl);
   
-  // Create a temporary input to copy the URL
   const tempInput = document.createElement('input');
   tempInput.value = messageUrl;
   document.body.appendChild(tempInput);
@@ -272,7 +326,7 @@ function copyUrl(url) {
   alert('URL copied to clipboard!');
 }
 
-// Generate user ID for tracking private messages
+// Generate user ID
 function generateUserId() {
   return 'user_' + Math.random().toString(36).substring(2, 15);
 }
