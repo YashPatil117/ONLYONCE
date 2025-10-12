@@ -1,19 +1,3 @@
-import { db, storage, doc, setDoc, getDoc, getDocs, deleteDoc, collection, ref, uploadBytes, getDownloadURL } from "./firebase.js";
-
-import { 
-  db, 
-  storage, 
-  doc, 
-  setDoc, 
-  getDoc, 
-  getDocs, 
-  deleteDoc, 
-  collection, 
-  ref, 
-  uploadBytes, 
-  getDownloadURL 
-} from "./firebase.js";
-
 // DOM Elements
 const createBtn = document.getElementById("createBtn");
 const messageWall = document.getElementById("messageWall");
@@ -58,9 +42,9 @@ createBtn.addEventListener("click", async () => {
   let fileURL = null;
   if (file) {
     try {
-      const storageRef = ref(storage, `files/${id}-${file.name}`);
-      await uploadBytes(storageRef, file);
-      fileURL = await getDownloadURL(storageRef);
+      const storageRef = firebase.storage().ref(`files/${id}-${file.name}`);
+      await storageRef.put(file);
+      fileURL = await storageRef.getDownloadURL();
     } catch (error) {
       console.error("File upload failed:", error);
       alert("Failed to upload image. Please try again.");
@@ -69,7 +53,7 @@ createBtn.addEventListener("click", async () => {
   }
 
   try {
-    await setDoc(doc(db, "messages", id), {
+    await firebase.firestore().collection("messages").doc(id).set({
       text,
       fileURL,
       isPublic: visibility === "public",
@@ -108,7 +92,7 @@ createBtn.addEventListener("click", async () => {
 // Load public messages
 async function loadPublicMessages() {
   try {
-    const snapshot = await getDocs(collection(db, "messages"));
+    const snapshot = await firebase.firestore().collection("messages").get();
     const all = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
     const publicMsgs = all.filter(m => m.isPublic);
     
@@ -135,7 +119,7 @@ async function loadPrivateMessages() {
   localStorage.setItem('userId', userId);
   
   try {
-    const snapshot = await getDocs(collection(db, "messages"));
+    const snapshot = await firebase.firestore().collection("messages").get();
     const all = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
     const privateMsgs = all.filter(m => !m.isPublic && m.creator === userId);
     
@@ -207,8 +191,8 @@ async function showMessage(id) {
   messageView.classList.remove("hidden");
 
   try {
-    const docRef = doc(db, "messages", id);
-    const snap = await getDoc(docRef);
+    const docRef = firebase.firestore().collection("messages").doc(id);
+    const snap = await docRef.get();
     
     if (snap.exists()) {
       const data = snap.data();
@@ -220,7 +204,7 @@ async function showMessage(id) {
       }
       
       status.textContent = "⚠️ This message has now been deleted forever.";
-      await deleteDoc(docRef);
+      await docRef.delete();
     } else {
       messageText.textContent = "This message was already opened or deleted.";
       status.textContent = "";
@@ -235,8 +219,8 @@ async function showMessage(id) {
 // Preview private message (without deleting it)
 async function previewPrivateMessage(id) {
   try {
-    const docRef = doc(db, "messages", id);
-    const snap = await getDoc(docRef);
+    const docRef = firebase.firestore().collection("messages").doc(id);
+    const snap = await docRef.get();
     
     if (snap.exists()) {
       const data = snap.data();

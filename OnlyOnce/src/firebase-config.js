@@ -1,4 +1,4 @@
-// firebase.js - Simple version
+// firebase-config.js
 const firebaseConfig = {
   apiKey: "AIzaSyDklykMWj771hC_wOE4f6c1B2RkCjUVwnY",
   authDomain: "onlyonce-f7f15.firebaseapp.com",
@@ -13,8 +13,3 @@ const firebaseConfig = {
 const app = firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const storage = firebase.storage();
-
-// Export as global variables
-window.db = db;
-window.storage = storage;
-window.firebase = firebase;
