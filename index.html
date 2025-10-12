@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Self-Destruct Messages</title>
+  <link rel="stylesheet" href="OnlyOnce/src/style.css" />
+</head>
+<body>
+  <div class="background-flow"></div>
+  
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <h1>ONLY ONCE</h1>
+      <p>Messages that disappear forever after reading</p>
+    </header>
+
+    <div class="main-layout">
+      <!-- Left Side - Private Message Creation -->
+      <div class="left-panel">
+        <div class="create-card">
+          <h2>Create Secret Message</h2>
+          
+          <textarea 
+            id="msgText" 
+            placeholder="What's your secret? 🤫"
+            maxlength="500"
+          ></textarea>
+          <div class="char-count">0/500</div>
+          
+          <div class="file-upload">
+            <label for="msgFile" class="file-label">
+              <span>📷 Add Image (Optional)</span>
+              <input type="file" id="msgFile" accept="image/*">
+            </label>
+          </div>
+
+          <div class="visibility-options">
+            <label class="radio-option">
+              <input type="radio" name="visibility" value="public" checked>
+              <span class="radio-custom"></span>
+              Public (Everyone sees)
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="visibility" value="private">
+              <span class="radio-custom"></span>
+              Private (Link only)
+            </label>
+          </div>
+
+          <button id="createBtn" class="create-button">
+            Create Self-Destruct Message
+          </button>
+
+          <div id="linkOutput" class="link-output"></div>
+        </div>
+
+        <!-- Your Private Messages -->
+        <div class="private-messages">
+          <h3>Your Private Messages</h3>
+          <div id="privateMessagesList" class="messages-list">
+            <!-- Private messages will appear here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Side - Public Messages -->
+      <div class="right-panel">
+        <div class="public-wall">
+          <h2>Public Message Wall</h2>
+          <div id="messageWall" class="wall-grid">
+            <!-- Public messages will appear here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Message View (Hidden by default) -->
+    <div id="messageView" class="message-view hidden">
+      <div class="message-content">
+        <h2>Secret Message</h2>
+        <div id="messageText" class="message-text"></div>
+        <img id="messageImage" class="message-img" src="" alt="">
+        <div id="status" class="status-message"></div>
+        <button class="back-btn" onclick="goHome()">← Back Home</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="OnlyOnce/src/main.js"></script>
+  <script type="module" src="OnlyOnce/src/script.js"></script>
+</body>
+</html>
