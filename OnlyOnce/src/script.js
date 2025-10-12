@@ -1,3 +1,5 @@
+import { db, storage, doc, setDoc, getDoc, getDocs, deleteDoc, collection, ref, uploadBytes, getDownloadURL } from "./firebase.js";
+
 import { 
   db, 
   storage, 

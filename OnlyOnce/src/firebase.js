@@ -1,21 +1,4 @@
-// firebase.js - Updated for GitHub Pages
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { getStorage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-import { 
-  doc, 
-  setDoc, 
-  getDoc, 
-  getDocs, 
-  deleteDoc, 
-  collection 
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { 
-  ref, 
-  uploadBytes, 
-  getDownloadURL 
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-
+// firebase.js - Simple version
 const firebaseConfig = {
   apiKey: "AIzaSyDklykMWj771hC_wOE4f6c1B2RkCjUVwnY",
   authDomain: "onlyonce-f7f15.firebaseapp.com",
@@ -26,20 +9,12 @@ const firebaseConfig = {
   measurementId: "G-FCCKGBM1TP"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const storage = getStorage(app);
+// Initialize Firebase
+const app = firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const storage = firebase.storage();
 
-export { 
-  db, 
-  storage, 
-  doc, 
-  setDoc, 
-  getDoc, 
-  getDocs, 
-  deleteDoc, 
-  collection, 
-  ref, 
-  uploadBytes, 
-  getDownloadURL 
-};
+// Export as global variables
+window.db = db;
+window.storage = storage;
+window.firebase = firebase;
