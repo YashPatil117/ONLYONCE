@@ -1,7 +1,7 @@
-// firebase.js
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+// firebase.js - Updated for GitHub Pages
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getStorage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 import { 
   doc, 
   setDoc, 
@@ -9,12 +9,12 @@ import {
   getDocs, 
   deleteDoc, 
   collection 
-} from "firebase/firestore";
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { 
   ref, 
   uploadBytes, 
   getDownloadURL 
-} from "firebase/storage";
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDklykMWj771hC_wOE4f6c1B2RkCjUVwnY",
