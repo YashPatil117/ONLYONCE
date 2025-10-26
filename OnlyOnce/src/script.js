@@ -25,16 +25,16 @@ async function testFirestore() {
       isPublic: true,
       createdAt: new Date().toISOString()
     });
-    console.log("✅ Firestore write successful");
+    console.log(" Firestore write successful");
     
     const snap = await firebase.firestore().collection("messages").doc(testId).get();
     if (snap.exists) {
-      console.log("✅ Firestore read successful");
+      console.log(" Firstore red succesful");
       await firebase.firestore().collection("messages").doc(testId).delete();
-      console.log("✅ Firestore delete successful");
+      console.log(" Firesore deleet sucessful");
     }
   } catch (error) {
-    console.error("❌ Firestore error:", error);
+    console.error(" Firtore error:", error);
   }
 }
 
@@ -71,20 +71,20 @@ createBtn.addEventListener("click", async () => {
   let fileURL = null;
   if (file) {
     try {
-      console.log("📤 Uploading file...");
+      console.log("Uploading file...");
       const storageRef = firebase.storage().ref(`files/${id}-${file.name}`);
       await storageRef.put(file);
       fileURL = await storageRef.getDownloadURL();
-      console.log("✅ File uploaded:", fileURL);
+      console.log(" File uploaded:", fileURL);
     } catch (error) {
-      console.error("❌ File upload failed:", error);
+      console.error(" File upload failed:", error);
       alert("Failed to upload image. Please try again.");
       return;
     }
   }
 
   try {
-    console.log("💾 Saving to Firestore...");
+    console.log(" Saving to Firestore...");
     await firebase.firestore().collection("messages").doc(id).set({
       text,
       fileURL,
@@ -92,7 +92,7 @@ createBtn.addEventListener("click", async () => {
       createdAt: new Date().toISOString(),
       creator: localStorage.getItem('userId') || generateUserId()
     });
-    console.log("✅ Message saved to Firestore");
+    console.log("essage saved to Firestore");
 
     if (visibility === "private") {
       const messageUrl = `${window.location.origin}${window.location.pathname}?id=${id}`;
@@ -115,7 +115,7 @@ createBtn.addEventListener("click", async () => {
     charCount.textContent = "0/500";
     
   } catch (error) {
-    console.error("❌ Error creating message:", error);
+    console.error(" Error creating message:", error);
     alert("Failed to create message. Please try again.");
   }
 });
@@ -123,13 +123,13 @@ createBtn.addEventListener("click", async () => {
 // Load public messages
 async function loadPublicMessages() {
   try {
-    console.log("📥 Loading public messages...");
+    console.log(" Loading public messages...");
     const snapshot = await firebase.firestore().collection("messages").get();
     const all = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-    console.log("📦 All messages from Firestore:", all);
+    console.log(" All messages from Firestore:", all);
     
     const publicMsgs = all.filter(m => m.isPublic);
-    console.log("👥 Public messages:", publicMsgs);
+    console.log(" Public messages:", publicMsgs);
     
     messageWall.innerHTML = "";
     
