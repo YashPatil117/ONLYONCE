@@ -1,17 +1,21 @@
 pipeline {
     agent any
 
+    tools {
+        maven 'M3'   // use the Maven installation configured in Jenkins
+    }
+
     stages {
         stage('Build') {
             steps {
-                echo 'Building the project...'
-                sh 'mvn clean package'
+                echo 'Building project...'
+                bat 'mvn clean package'    // ✅ Use bat for Windows
             }
         }
 
         stage('Deploy to Tomcat') {
             steps {
-                echo 'Deploying to Tomcat...'
+                echo 'Deploying WAR to Tomcat...'
                 deploy adapters: [
                     tomcat9(
                         credentialsId: 'tomcat-credentials',
@@ -25,10 +29,10 @@ pipeline {
 
     post {
         success {
-            echo '✅ Deployment completed successfully!'
+            echo '✅ Build and deploy successful!'
         }
         failure {
-            echo '❌ Deployment failed!'
+            echo '❌ Build or deploy failed.'
         }
     }
 }
