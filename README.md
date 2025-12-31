@@ -33,9 +33,7 @@ Send messages that automatically delete after being viewed once. Perfect for sha
 - **Hosting**: GitHub Pages
 - **Styling**: Custom CSS with modern design
 
-## 📸 Screenshots
 
-*(Add screenshots of your app here)*
 
 ## 🚀 Usage
 
